@@ -1,0 +1,10 @@
+target/
+node_modules/
+dist/
+.env
+*.log
+.idea/
+.vscode/
+*.iml
+neobank_submission.zip
+finverse_submission.zip
