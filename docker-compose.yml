@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: neobank-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: neobank_db
+      POSTGRES_USER: neobank_user
+      POSTGRES_PASSWORD: neobank_secure_password_2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - neobank_pgdata:/var/lib/postgresql/data
+      - ./database/init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - neobank-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U neobank_user -d neobank_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: neobank-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/neobank_db
+      SPRING_DATASOURCE_USERNAME: neobank_user
+      SPRING_DATASOURCE_PASSWORD: neobank_secure_password_2026
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      JWT_EXPIRATION_MS: 86400000
+      JWT_REFRESH_EXPIRATION_MS: 604800000
+    ports:
+      - "8080:8080"
+    networks:
+      - neobank-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: neobank-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - neobank-network
+
+volumes:
+  neobank_pgdata:
+    driver: local
+
+networks:
+  neobank-network:
+    driver: bridge

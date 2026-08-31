@@ -1,0 +1,21 @@
+CREATE TABLE support_tickets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    ticket_number VARCHAR(36) NOT NULL UNIQUE,
+    subject VARCHAR(200) NOT NULL,
+    category VARCHAR(50) NOT NULL DEFAULT 'GENERAL',
+    priority VARCHAR(20) NOT NULL DEFAULT 'MEDIUM',
+    status VARCHAR(30) NOT NULL DEFAULT 'OPEN',
+    assigned_agent_id UUID REFERENCES users(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE ticket_messages (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    ticket_id UUID NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+    sender_id UUID NOT NULL REFERENCES users(id),
+    message TEXT NOT NULL,
+    is_internal BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
