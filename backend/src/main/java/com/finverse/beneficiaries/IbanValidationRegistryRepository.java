@@ -1,0 +1,27 @@
+package com.finverse.beneficiaries;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+/**
+ * Repository interface for IbanValidationRegistry
+ */
+@Repository
+public interface IbanValidationRegistryRepository extends JpaRepository<IbanValidationRegistry, UUID> {
+
+    List<IbanValidationRegistry> findByTenantId(UUID tenantId);
+
+    List<IbanValidationRegistry> findByUserId(UUID userId);
+
+    Optional<IbanValidationRegistry> findBySystemReference(String ref);
+
+    List<IbanValidationRegistry> findByOperationalStatus(String status);
+
+    @Query("SELECT e FROM IbanValidationRegistry e WHERE e.tenantId = :tenantId AND e.operationalStatus = :status")
+    List<IbanValidationRegistry> findActiveByTenant(@Param("tenantId") UUID tenantId, @Param("status") String status);
+}
