@@ -1,0 +1,8 @@
+import React from 'react'; import { Navigate, Outlet } from 'react-router-dom'; import { useAuth } from '../contexts/AuthContext';
+export const ProtectedRoute: React.FC<{ requiredRole?: string }> = ({ requiredRole }) => {
+  const { isAuthenticated, isLoading, hasRole } = useAuth();
+  if (isLoading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">Loading...</div>;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (requiredRole && !hasRole(requiredRole)) return <Navigate to="/dashboard" replace />;
+  return <Outlet />;
+};
